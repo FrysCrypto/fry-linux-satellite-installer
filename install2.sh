@@ -38,6 +38,9 @@ install_if_not_present() {
     local cmd_name=${2:-$1}
     if ! command -v "$cmd_name" &> /dev/null; then
         echo "$1 is not installed. Installing..."
+        if [ "$1" = "nodejs" ]; then
+            curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+        fi
         sudo apt install -y "$1"
         echo "$1 installed."
     else
@@ -45,7 +48,7 @@ install_if_not_present() {
     fi
 }
 
-install_if_not_present node
+install_if_not_present nodejs
 install_if_not_present npm
 install_if_not_present p7zip-full 7z
 install_if_not_present wget
@@ -57,9 +60,6 @@ git clone https://github.com/FrysCrypto/FRY-Satellite-Linux.git
 echo "Repository cloned."
 
 cd FRY-Satellite-Linux || { echo "Failed to navigate to FRY-Satellite-Linux directory. Exiting..."; exit 1; }
-
-# Assuming the .7z file and directory structure is similar to the previous repo.
-# Adjust the file name and directory paths as necessary based on the actual content of the new repo.
 
 if [ -f "FRY Satellite Javascript.7z" ]; then
     echo "Extracting .7z file..."
