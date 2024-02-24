@@ -38,6 +38,12 @@ install_if_not_present() {
     local cmd_name=${2:-$1}
     if ! command -v "$cmd_name" &> /dev/null; then
         echo "$1 is not installed. Installing..."
+        if [ "$1" = "nodejs" ]; then
+            curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+        fi
+        if [ "$1" = "curl" ]; then
+            sudo apt install -y curl
+        fi
         sudo apt install -y "$1"
         echo "$1 installed."
     else
@@ -63,37 +69,16 @@ echo "Repository cloned."
 
 cd FRY-Satellite-Linux || { echo "Failed to navigate to FRY-Satellite-Linux directory. Exiting..."; exit 1; }
 
-if [ -f "FRY Satellite Javascript.7z" ]; then
+if [ -f "FRY Satellite.7z" ]; then
     echo "Extracting .7z file..."
-    7z x "FRY Satellite Javascript.7z"
+    7z x "FRY Satellite.7z"
     echo "Done!"
 else
     echo "The .7z file does not exist. Exiting..."
     exit 1
 fi
 
-cd "FRY Satellite Javascript" || { echo "Failed to navigate to FRY Satellite Javascript directory. Exiting..."; exit 1; }
-cd "Connectivity Validation" || { echo "Failed to navigate to Connectivity Validation directory. Exiting..."; exit 1; }
-
-echo "Installing dependencies..."
-npm install algosdk
-echo "Done!"
-
-ABSOLUTE_PATH=$(pwd)
-
-echo "Creating run.sh script..."
-echo "#!/bin/bash" > "$SCRIPT_PATH/run.sh"
-echo "node \"$ABSOLUTE_PATH/main.js\"" >> "$SCRIPT_PATH/run.sh"
-chmod +x "$SCRIPT_PATH/run.sh"
-
-read -rp "Do you want to add the script as a cron task to run every hour? (yes/no): " cron_response
-
-if [[ $cron_response == "yes" || $cron_response == "y" ]]; then
-    (crontab -l 2>/dev/null; echo "0 * * * * $SCRIPT_PATH/run.sh >> $ABSOLUTE_PATH/logs.log 2>&1") | crontab -
-    echo "Cron task added. The script will run every hour and logs will be saved in logs.log."
-else
-    echo "Not adding to cron."
-fi
+# The subsequent commands should be adjusted according to the contents of the .7z file once extracted
 
 echo "Installation complete!"
 echo "To run the script, run ./run.sh"
