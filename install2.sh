@@ -38,9 +38,6 @@ install_if_not_present() {
     local cmd_name=${2:-$1}
     if ! command -v "$cmd_name" &> /dev/null; then
         echo "$1 is not installed. Installing..."
-        if [ "$1" = "nodejs" ]; then
-            curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-        fi
         sudo apt install -y "$1"
         echo "$1 installed."
     else
@@ -48,7 +45,12 @@ install_if_not_present() {
     fi
 }
 
-install_if_not_present nodejs
+# Ensure curl is installed for adding NodeSource repository
+install_if_not_present curl
+
+# Node.js installation with NodeSource
+install_if_not_present nodejs nodejs # NodeSource setup will be called within the function if nodejs is missing
+
 install_if_not_present npm
 install_if_not_present p7zip-full 7z
 install_if_not_present wget
