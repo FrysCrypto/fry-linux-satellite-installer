@@ -17,6 +17,7 @@ echo '                             '
 
 set -e
 
+# SCRIPT_PATH="/home/debian/scripts/FRY-Satellite-Linux/FRY Satellite/Connectivity Validation"
 SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd)"
 echo "$SCRIPT_PATH"
 
@@ -39,10 +40,12 @@ install_if_not_present() {
     if ! command -v "$cmd_name" &> /dev/null; then
         echo "$1 is not installed. Installing..."
         if [ "$1" = "nodejs" ]; then
+            # Ensure curl is installed for adding NodeSource repository
+            if ! command -v curl &> /dev/null; then
+                sudo apt install -y curl
+            fi
+            # Node.js installation with NodeSource
             curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-        fi
-        if [ "$1" = "curl" ]; then
-            sudo apt install -y curl
         fi
         sudo apt install -y "$1"
         echo "$1 installed."
@@ -51,12 +54,8 @@ install_if_not_present() {
     fi
 }
 
-# Ensure curl is installed for adding NodeSource repository
-install_if_not_present curl
 
-# Node.js installation with NodeSource
-install_if_not_present nodejs nodejs # NodeSource setup will be called within the function if nodejs is missing
-
+install_if_not_present nodejs
 install_if_not_present npm
 install_if_not_present p7zip-full 7z
 install_if_not_present wget
@@ -78,7 +77,31 @@ else
     exit 1
 fi
 
-# The subsequent commands should be adjusted according to the contents of the .7z file once extracted
+# ... (any other steps needed for setup) ...
+
+# Create run.sh script if it doesn't exist
+if [ ! -f "$SCRIPT_PATH/run.sh" ]; then
+    echo "run.sh script does not exist. Creating it now..."
+    echo "#!/bin/bash" > "$SCRIPT_PATH/run.sh"
+    # Add the commands you need to run your application here
+    echo "cd \"$SCRIPT_PATH/FRY-Satellite-Linux/FRY Satellite/Connectivity Validation\"" >> "$SCRIPT_PATH/run.sh"
+    echo "node main.js" >> "$SCRIPT_PATH/run.sh" # Replace "node main.js" with the actual command to start your app
+    chmod +x "$SCRIPT_PATH/run.sh"
+    echo "run.sh script created."
+else
+    echo "run.sh script already exists."
+fi
 
 echo "Installation complete!"
 echo "To run the script, run ./run.sh"
+
+
+# Create or append to run.sh with the specified command
+echo '#!/bin/bash' > /home/$USER/scripts/run.sh
+echo 'crontab -e' >> /home/$USER/scripts/run.sh
+
+# Make run.sh executable
+chmod +x /home/$USER/scripts/run.sh
+
+# Add a new crontab entry to run run.sh every hour. The approach used here is to ensure compatibility across different Linux OSes.
+(crontab -l 2>/dev/null; echo "0 * * * * /home/$USER/scripts/run.sh") | crontab -
