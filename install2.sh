@@ -84,8 +84,7 @@ if [ ! -f "$SCRIPT_PATH/run.sh" ]; then
     echo "run.sh script does not exist. Creating it now..."
     echo "#!/bin/bash" > "$SCRIPT_PATH/run.sh"
     # Add the commands you need to run your application here
-    echo "cd \"$SCRIPT_PATH/FRY-Satellite-Linux/FRY Satellite/Connectivity Validation\"" >> "$SCRIPT_PATH/run.sh"
-    echo "node main.js" >> "$SCRIPT_PATH/run.sh" # Replace "node main.js" with the actual command to start your app
+    echo "0 * * * * \"$SCRIPT_PATH/run.sh\"" > "$SCRIPT_PATH/run.sh"
     chmod +x "$SCRIPT_PATH/run.sh"
     echo "run.sh script created."
 else
@@ -95,13 +94,3 @@ fi
 echo "Installation complete!"
 echo "To run the script, run ./run.sh"
 
-
-# Create or append to run.sh with the specified command
-echo '#!/bin/bash' > /home/$USER/scripts/run.sh
-echo 'crontab -e' >> /home/$USER/scripts/run.sh
-
-# Make run.sh executable
-chmod +x /home/$USER/scripts/run.sh
-
-# Add a new crontab entry to run run.sh every hour. The approach used here is to ensure compatibility across different Linux OSes.
-(crontab -l 2>/dev/null; echo "0 * * * * /home/$USER/scripts/run.sh") | crontab -
